@@ -99,10 +99,12 @@ async def procesar_excel(
                         fecha_actual = pd.Timestamp(year=fecha_inicio_dt.year, month=fecha_inicio_dt.month, day=dia)
                     except Exception:
                         continue  # Si el día no existe en el mes, lo ignora
+                    # ...existing code...
                     horas = calcular_horas(entrada, salida)
                     dia_semana = fecha_actual.weekday()
-                    horas_extras = calcular_horas_extras(horas, dia_semana)
+                    horas_extras = calcular_horas_extras(horas, dia_semana, entrada)  # <-- pasa entrada aquí
                     codigo = obtener_codigo(entrada, horas, salida, dia_semana)
+                    # ...existing code...
                     registros.append({
                         "ID": id_empleado,
                         "Fecha": fecha_actual.strftime("%Y-%m-%d"),

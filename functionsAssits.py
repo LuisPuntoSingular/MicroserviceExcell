@@ -22,21 +22,47 @@ def calcular_horas(entrada, salida):
     except Exception:
         return 0
 
-def calcular_horas_extras(horas_trabajadas, dia_semana):
+def calcular_horas_extras(horas_trabajadas, dia_semana, entrada=None):
     """
-    Calcula las horas extras según el día de la semana.
+    Calcula las horas extras considerando que solo cuentan después de las 8:00 am.
     Lunes a viernes: 9 horas normales.
     Sábado: 6 horas normales.
     Domingo: 0 horas normales (todas las horas son extras).
     """
-    if dia_semana == 6:  # Domingo
-        horas_normales = 0
-    elif dia_semana == 5:  # Sábado
-        horas_normales = 6
-    else:  # Lunes a viernes
-        horas_normales = 9
-    extras = horas_trabajadas - horas_normales
-    return round(extras, 2)
+    if not entrada:
+        return 0
+
+    try:
+        for fmt in ("%H:%M:%S", "%H:%M"):
+            try:
+                t_entrada = datetime.strptime(str(entrada), fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            return 0
+
+        # Si la entrada es antes de las 8:00 am, ajusta la hora de entrada a las 8:00 am
+        hora_ocho = t_entrada.replace(hour=8, minute=0, second=0)
+        if t_entrada < hora_ocho:
+            t_entrada = hora_ocho
+
+        # Calcula la hora de salida sumando las horas trabajadas a la hora de entrada ajustada
+        t_salida = t_entrada + timedelta(hours=horas_trabajadas)
+        horas_reales = (t_salida - t_entrada).total_seconds() / 3600
+
+        # Define horas normales según el día
+        if dia_semana == 6:  # Domingo
+            horas_normales = 0
+        elif dia_semana == 5:  # Sábado
+            horas_normales = 6
+        else:  # Lunes a viernes
+            horas_normales = 9
+
+        extras = horas_reales - horas_normales
+        return round(extras, 2)
+    except Exception:
+        return 0
 
 def obtener_codigo(entrada, horas, salida, dia_semana):
     # Si no hay entrada ni salida: Falta
