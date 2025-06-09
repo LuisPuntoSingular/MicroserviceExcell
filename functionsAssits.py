@@ -22,34 +22,24 @@ def calcular_horas(entrada, salida):
     except Exception:
         return 0
 
-def calcular_horas_extras(horas_trabajadas, dia_semana, entrada=None):
+def calcular_horas_extras(horas_trabajadas, dia_semana, entrada=None, salida=None):
     """
-    Calcula las horas extras considerando que solo cuentan después de las 8:00 am.
-    Lunes a viernes: 9 horas normales.
-    Sábado: 6 horas normales.
-    Domingo: 0 horas normales (todas las horas son extras).
+    Solo cuenta como horas extra el tiempo después de la jornada normal,
+    sin importar si la entrada fue antes de las 8:00 am.
     """
-    if not entrada:
+    if not entrada or not salida:
         return 0
 
     try:
         for fmt in ("%H:%M:%S", "%H:%M"):
             try:
                 t_entrada = datetime.strptime(str(entrada), fmt)
+                t_salida = datetime.strptime(str(salida), fmt)
                 break
             except ValueError:
                 continue
         else:
             return 0
-
-        # Si la entrada es antes de las 8:00 am, ajusta la hora de entrada a las 8:00 am
-        hora_ocho = t_entrada.replace(hour=8, minute=0, second=0)
-        if t_entrada < hora_ocho:
-            t_entrada = hora_ocho
-
-        # Calcula la hora de salida sumando las horas trabajadas a la hora de entrada ajustada
-        t_salida = t_entrada + timedelta(hours=horas_trabajadas)
-        horas_reales = (t_salida - t_entrada).total_seconds() / 3600
 
         # Define horas normales según el día
         if dia_semana == 6:  # Domingo
@@ -59,7 +49,15 @@ def calcular_horas_extras(horas_trabajadas, dia_semana, entrada=None):
         else:  # Lunes a viernes
             horas_normales = 9
 
-        extras = horas_reales - horas_normales
+        # Hora de salida estándar (fin de jornada normal)
+        t_salida_normal = t_entrada + timedelta(hours=horas_normales)
+
+        # Si la salida real es después de la salida normal, hay extras
+        if t_salida > t_salida_normal:
+            extras = (t_salida - t_salida_normal).total_seconds() / 3600
+        else:
+            extras = 0
+
         return round(extras, 2)
     except Exception:
         return 0

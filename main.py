@@ -102,7 +102,7 @@ async def procesar_excel(
                     # ...existing code...
                     horas = calcular_horas(entrada, salida)
                     dia_semana = fecha_actual.weekday()
-                    horas_extras = calcular_horas_extras(horas, dia_semana, entrada)  # <-- pasa entrada aquí
+                    horas_extras = calcular_horas_extras(horas, dia_semana, entrada, salida)
                     codigo = obtener_codigo(entrada, horas, salida, dia_semana)
                     # ...existing code...
                     registros.append({
